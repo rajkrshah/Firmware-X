@@ -1,7 +1,7 @@
 # 🔬 Firmware-X — Firmware Analysis Tool
 
 
-![server file](./server.png)
+![server file](./_server.png)
 ![server file](./1.png)
 ![server file](./2.png)
 ![server file](./3.png)
