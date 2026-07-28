@@ -1,22 +1,15 @@
 # 🔬 Firmware-X — Firmware Analysis Tool
 
 ```
-╔═══════════════════════════════════════════════════╗
-║                                                   ║
-║   ███████╗██╗██████╗ ███╗   ███╗██╗    ██╗██╗  ██╗║
-║   ██╔════╝██║██╔══██╗████╗ ████║██║    ██║╚██╗██╔╝║
-║   █████╗  ██║██████╔╝██╔████╔██║██║ █╗ ██║ ╚███╔╝ ║
-║   ██╔══╝  ██║██╔══██╗██║╚██╔╝██║██║███╗██║ ██╔██╗ ║
-║   ██║     ██║██║  ██║██║ ╚═╝ ██║╚███╔███╔╝██╔╝ ██╗║
-║   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝ ╚══╝╚══╝╚═╝  ╚═╝║
-║                                                   ║
-║   Cross-Platform Firmware Analysis Tool v1.0.0    ║
-║   100% Local Processing — Your Data Stays Yours   ║
-║                                                   ║
-╚═══════════════════════════════════════════════════╝
 
 ```
 ![server file](./server.png)
+![server file](./1.png)
+![server file](./2.png)
+![server file](./3.png)
+![server file](./4.png)
+![server file](./5.png)
+![server file](./6.png)
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-brightgreen)
