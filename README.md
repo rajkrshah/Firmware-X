@@ -1,4 +1,4 @@
-# 🔬 FirmwareX — Firmware Analysis Tool
+# 🔬 Firmware-X — Firmware Analysis Tool
 
 ```
 ╔═══════════════════════════════════════════════════╗
