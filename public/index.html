@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firmware-X v1.0.0 - Decryption & Decompilation Tool</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header glass-panel">
+            <div class="logo-container">
+                <h1 class="logo-text gradient-text">Firmware-X</h1>
+                <span class="version-badge">v1.0.0</span>
+            </div>
+            <p class="subtitle">Advanced Firmware Analysis & Decryption Suite</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Drop Zone (Visible initially) -->
+            <div id="drop-zone" class="drop-zone">
+                <div class="drop-zone-content">
+                    <div class="drop-icon">🔬</div>
+                    <h2>Firmware-X v1.0.0</h2>
+                    <p>Select a firmware file, then click Start to decrypt & decompile</p>
+                    <input type="file" id="file-input" class="hidden-input">
+                    <div id="selected-file-info" class="selected-file-info hidden">
+                        <span class="selected-file-icon">📄</span>
+                        <span id="selected-file-name" class="selected-file-name">No file selected</span>
+                        <span id="selected-file-size" class="selected-file-size"></span>
+                    </div>
+                    <div class="drop-zone-actions">
+                        <button class="btn btn-outline" id="btn-select-file">Select File</button>
+                        <button class="btn btn-primary" id="btn-start" disabled>▶ Start</button>
+                    </div>
+                    <div class="supported-formats">
+                        <span>.bin</span><span>.exe</span><span>.elf</span><span>.hex</span>
+                        <span>.zip</span><span>.gz</span><span>.img</span><span>.apk</span>
+                        <span>.uf2</span><span>.dfu</span><span>.srec</span><span>+30 more</span>
+                    </div>
+                </div>
+                <div class="particles"></div>
+            </div>
+
+            <!-- File Info Bar (Hidden initially) -->
+            <div id="file-info-bar" class="file-info-bar glass-panel hidden">
+                <div class="info-badge">
+                    <span class="icon">📄</span>
+                    <span id="info-filename" class="info-value">firmware.bin</span>
+                </div>
+                <div class="info-badge">
+                    <span class="icon">💾</span>
+                    <span id="info-size" class="info-value">0 MB</span>
+                </div>
+                <div class="info-badge">
+                    <span class="icon">🏷️</span>
+                    <span id="info-type" class="info-value">Unknown</span>
+                </div>
+                <div class="info-badge hash-badge">
+                    <span class="icon">🔑</span>
+                    <span id="info-hash" class="info-value mono">calculating...</span>
+                </div>
+            </div>
+
+            <!-- Workspace (Hidden initially) -->
+            <div id="workspace" class="workspace hidden">
+                <!-- Tab Navigation -->
+                <nav class="tab-nav glass-panel">
+                    <button class="tab-btn active" data-target="panel-overview">Overview</button>
+                    <button class="tab-btn" data-target="panel-layers">Layers</button>
+                    <button class="tab-btn" data-target="panel-hex">Hex View</button>
+                    <button class="tab-btn" data-target="panel-strings">Strings</button>
+                    <button class="tab-btn" data-target="panel-disassembly">Disassembly</button>
+                    <button class="tab-btn" data-target="panel-entropy">Entropy</button>
+                    <button class="tab-btn" data-target="panel-encryption">Encryption Analysis</button>
+                    <button class="tab-btn security-tab" data-target="panel-security">🛡️ Security</button>
+                </nav>
+
+                <!-- Tab Panels -->
+                <div class="tab-content">
+                    
+                    <!-- Overview Panel -->
+                    <div id="panel-overview" class="panel active slide-up">
+                        <div class="overview-grid">
+                            <div class="stat-card glass-panel accent-cyan">
+                                <div class="stat-icon">💾</div>
+                                <div class="stat-content">
+                                    <h3>File Size</h3>
+                                    <div id="stat-size" class="stat-value">0 B</div>
+                                </div>
+                            </div>
+                            <div class="stat-card glass-panel accent-purple">
+                                <div class="stat-icon">🏷️</div>
+                                <div class="stat-content">
+                                    <h3>File Type</h3>
+                                    <div id="stat-type" class="stat-value">Unknown</div>
+                                </div>
+                            </div>
+                            <div class="stat-card glass-panel accent-magenta">
+                                <div class="stat-icon">📈</div>
+                                <div class="stat-content">
+                                    <h3>Entropy Score</h3>
+                                    <div id="stat-entropy" class="stat-value">0.00</div>
+                                </div>
+                            </div>
+                            <div class="stat-card glass-panel accent-green">
+                                <div class="stat-icon">📝</div>
+                                <div class="stat-content">
+                                    <h3>Strings Found</h3>
+                                    <div id="stat-strings" class="stat-value">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card glass-panel accent-orange">
+                                <div class="stat-icon">🗂️</div>
+                                <div class="stat-content">
+                                    <h3>Layers</h3>
+                                    <div id="stat-layers" class="stat-value">0</div>
+                                </div>
+                            </div>
+                            <div class="stat-card glass-panel accent-red">
+                                <div class="stat-icon">🛡️</div>
+                                <div class="stat-content">
+                                    <h3>Security Issues</h3>
+                                    <div id="stat-security" class="stat-value">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="metadata-section glass-panel">
+                            <h3>Metadata & Signatures</h3>
+                            <table class="metadata-table">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="metadata-tbody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Layers Panel -->
+                    <div id="panel-layers" class="panel slide-up">
+                        <div class="layers-container">
+                            <div class="layer-tree glass-panel" id="layer-tree-container">
+                                <!-- Populated by JS -->
+                            </div>
+                            <div class="layer-details glass-panel" id="layer-details-container">
+                                <h3>Layer Details</h3>
+                                <div id="layer-details-content">
+                                    <p class="text-muted">Select a layer to view details.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hex View Panel -->
+                    <div id="panel-hex" class="panel slide-up">
+                        <div class="hex-toolbar glass-panel">
+                            <div class="input-group">
+                                <label>Go to Offset:</label>
+                                <input type="text" id="hex-goto" class="mono" placeholder="0x000000">
+                                <button id="btn-goto" class="btn btn-sm">Go</button>
+                            </div>
+                            <div class="input-group">
+                                <label>Search:</label>
+                                <input type="text" id="hex-search" placeholder="Hex or Text">
+                                <button id="btn-hex-search" class="btn btn-sm">Search</button>
+                            </div>
+                            <div class="input-group">
+                                <label>Width:</label>
+                                <select id="hex-width">
+                                    <option value="8">8 Bytes</option>
+                                    <option value="16" selected>16 Bytes</option>
+                                    <option value="32">32 Bytes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="hex-container" class="hex-viewer glass-panel mono">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div class="hex-info-bar glass-panel mono">
+                            Cursor: <span id="hex-cursor-pos">0x000000</span> | Selected: <span id="hex-selection-len">0</span> bytes
+                        </div>
+                    </div>
+
+                    <!-- Strings Panel -->
+                    <div id="panel-strings" class="panel slide-up">
+                        <div class="strings-filter glass-panel">
+                            <div class="filter-group">
+                                <label>Min Length: <span id="string-len-val">4</span></label>
+                                <input type="range" id="string-min-len" min="2" max="64" value="4">
+                            </div>
+                            <div class="filter-group checkboxes">
+                                <label><input type="checkbox" id="chk-url" checked> URLs</label>
+                                <label><input type="checkbox" id="chk-path" checked> Paths</label>
+                                <label><input type="checkbox" id="chk-cred" checked> Credentials</label>
+                                <label><input type="checkbox" id="chk-crypto" checked> Crypto</label>
+                            </div>
+                            <div class="filter-group">
+                                <input type="text" id="string-search" placeholder="Filter strings...">
+                            </div>
+                        </div>
+                        <div class="strings-table-container glass-panel">
+                            <table class="strings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Offset</th>
+                                        <th>String</th>
+                                        <th>Type</th>
+                                        <th>Encoding</th>
+                                        <th>Length</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="strings-tbody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Disassembly Panel -->
+                    <div id="panel-disassembly" class="panel slide-up" style="position: relative;">
+                        <div class="disasm-toolbar glass-panel" style="flex-wrap: wrap;">
+                            <div class="input-group">
+                                <label>Architecture:</label>
+                                <select id="disasm-arch">
+                                    <option value="x86">x86</option>
+                                    <option value="arm">ARM</option>
+                                    <option value="arm64">ARM64 / AArch64</option>
+                                    <option value="mips">MIPS</option>
+                                    <option value="ppc">PowerPC</option>
+                                    <option value="sparc">SPARC</option>
+                                    <option value="sysz">SystemZ (s390x)</option>
+                                    <option value="m68k">M68K (Motorola 68000)</option>
+                                    <option value="xcore">XCore</option>
+                                    <option value="tms320c6x">TMS320C6x (DSP)</option>
+                                    <option value="m680x">M680x</option>
+                                    <option value="evm">EVM (Ethereum)</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Mode:</label>
+                                <select id="disasm-mode">
+                                    <option value="16">16-bit</option>
+                                    <option value="32" selected>32-bit</option>
+                                    <option value="64">64-bit</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Endianness:</label>
+                                <select id="disasm-endian">
+                                    <option value="auto">Auto-detect</option>
+                                    <option value="little">Little Endian</option>
+                                    <option value="big">Big Endian</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Base Addr (VA):</label>
+                                <input type="text" id="disasm-base" class="mono" placeholder="0x08048000" size="10" title="Virtual Base Address for decompilation formatting">
+                            </div>
+                            <div class="input-group">
+                                <label>File Offset:</label>
+                                <input type="text" id="disasm-offset" class="mono" placeholder="0x00" size="8" title="Physical offset in the file to start disassembling">
+                            </div>
+                            <div class="input-group">
+                                <label>Size/Count:</label>
+                                <input type="text" id="disasm-size" class="mono" placeholder="2000" size="8" title="Max Instructions">
+                            </div>
+                            <div class="input-group">
+                                <label>Search:</label>
+                                <input type="text" id="disasm-search" placeholder="Text or Reg/Inst" style="width: 120px;">
+                                <button id="btn-disasm-search" class="btn btn-sm">Find</button>
+                            </div>
+                                <div class="input-group" style="margin-left: auto; gap: 8px;">
+                                    <button id="btn-autodetect-arch" class="btn btn-secondary">Auto-detect</button>
+                                    <button id="btn-flow-diagram" class="btn btn-secondary" style="display:none; border-color: var(--accent-magenta); color: var(--accent-magenta);">View Flow Diagram</button>
+                                    <button id="btn-disassemble-full" class="btn btn-secondary" style="border-color: var(--accent-blue); color: var(--accent-blue);">Download Full .asm</button>
+                                    <button id="btn-disassemble" class="btn btn-primary">Disassemble</button>
+                                </div>
+                        </div>
+                        <div class="disasm-viewer-header glass-panel mono" style="display: flex; font-weight: bold; padding: 10px; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+                            <div style="flex: 0 0 100px;">Address</div>
+                            <div style="flex: 0 0 180px;">Bytes</div>
+                            <div style="flex: 0 0 80px;">Mnem</div>
+                            <div style="flex: 0 0 150px;">Operands</div>
+                            <div style="flex: 1; border-left: 1px solid var(--border-color); padding-left: 10px; color: var(--accent-magenta);">Pseudo-C</div>
+                        </div>
+                        <div id="disasm-container" class="disasm-viewer glass-panel mono">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div class="disasm-info glass-panel">
+                            Instructions: <span id="disasm-count">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Entropy Panel -->
+                    <div id="panel-entropy" class="panel slide-up">
+                        <div class="entropy-toolbar glass-panel">
+                            <div class="input-group">
+                                <label>Block Size:</label>
+                                <select id="entropy-block-size">
+                                    <option value="256">256 Bytes</option>
+                                    <option value="1024" selected>1024 Bytes</option>
+                                    <option value="4096">4096 Bytes</option>
+                                </select>
+                            </div>
+                            <div class="entropy-legend">
+                                <span class="legend-item"><span class="dot color-low"></span> Low (< 4)</span>
+                                <span class="legend-item"><span class="dot color-med"></span> Medium (4-7)</span>
+                                <span class="legend-item"><span class="dot color-high"></span> High (> 7) [Packed/Encrypted]</span>
+                            </div>
+                        </div>
+                        <div class="entropy-canvas-container glass-panel">
+                            <canvas id="entropy-canvas"></canvas>
+                        </div>
+                        <div class="entropy-stats-grid">
+                            <div class="entropy-card glass-panel">
+                                <h4>Average Entropy</h4>
+                                <div id="entropy-avg" class="value">0.00</div>
+                            </div>
+                            <div class="entropy-card glass-panel">
+                                <h4>Peak Entropy</h4>
+                                <div id="entropy-max" class="value">0.00</div>
+                            </div>
+                            <div class="entropy-card glass-panel">
+                                <h4>Suspicious Blocks</h4>
+                                <div id="entropy-suspicious" class="value">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Encryption Analysis Panel -->
+                    <div id="panel-encryption" class="panel slide-up">
+                        <div class="dashboard-grid">
+                            <div class="glass-panel" style="grid-column: span 12; display: flex; align-items: center; justify-content: space-between; padding: 20px;">
+                                <div>
+                                    <h2 style="margin:0; font-size: 1.8rem;">Encryption Status: <span id="enc-status-badge" class="severity-badge sev-info">Scanning...</span></h2>
+                                    <p style="color: var(--text-muted); margin: 10px 0 0 0;" id="enc-status-subtitle">Analyzing firmware structures...</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-cyan);" id="enc-entropy-score">0.00</div>
+                                    <div style="color: var(--text-muted); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px;">Shannon Entropy (Bits/Byte)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-panel" style="grid-column: span 12;">
+                                <h3>Vulnerability & Strength Assessment</h3>
+                                <div id="enc-assessment-text" style="line-height: 1.6; font-size: 1.1rem; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 4px solid var(--accent-magenta);">
+                                    Load a file to view the cryptographic vulnerability assessment.
+                                </div>
+                            </div>
+                            
+                            <div class="glass-panel" style="grid-column: span 12;">
+                                <h3>Detailed Crypto Findings</h3>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Finding Type</th>
+                                            <th>Description</th>
+                                            <th>Offset / Detail</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="enc-findings-body">
+                                        <!-- Populated via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Panel -->
+                    <div id="panel-security" class="panel">
+                        <!-- Risk Score Dashboard -->
+                        <div class="security-dashboard">
+                            <div class="risk-score-card glass-panel">
+                                <div class="risk-score-circle">
+                                    <svg viewBox="0 0 120 120" class="risk-gauge">
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+                                        <circle id="risk-gauge-arc" cx="60" cy="60" r="54" fill="none" stroke="var(--accent-green)" stroke-width="8" stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                                    </svg>
+                                    <div class="risk-score-text">
+                                        <span id="risk-score-value" class="risk-number">0.0</span>
+                                        <span class="risk-label">CVSS v3.1</span>
+                                    </div>
+                                </div>
+                                <div id="risk-level" class="risk-level clean">CLEAN</div>
+                            </div>
+
+                            <div class="severity-cards">
+                                <div class="severity-card glass-panel sev-critical">
+                                    <span class="sev-dot">🔴</span>
+                                    <span class="sev-label">Critical</span>
+                                    <span id="sev-critical-count" class="sev-count">0</span>
+                                </div>
+                                <div class="severity-card glass-panel sev-high">
+                                    <span class="sev-dot">🟠</span>
+                                    <span class="sev-label">High</span>
+                                    <span id="sev-high-count" class="sev-count">0</span>
+                                </div>
+                                <div class="severity-card glass-panel sev-medium">
+                                    <span class="sev-dot">🟡</span>
+                                    <span class="sev-label">Medium</span>
+                                    <span id="sev-medium-count" class="sev-count">0</span>
+                                </div>
+                                <div class="severity-card glass-panel sev-low">
+                                    <span class="sev-dot">🔵</span>
+                                    <span class="sev-label">Low</span>
+                                    <span id="sev-low-count" class="sev-count">0</span>
+                                </div>
+                                <div class="severity-card glass-panel sev-info">
+                                    <span class="sev-dot">⚪</span>
+                                    <span class="sev-label">Info</span>
+                                    <span id="sev-info-count" class="sev-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div class="security-filters glass-panel">
+                            <div class="filter-group">
+                                <label>Severity:</label>
+                                <select id="security-sev-filter">
+                                    <option value="all">All Severities</option>
+                                    <option value="critical">🔴 Critical</option>
+                                    <option value="high">🟠 High</option>
+                                    <option value="medium">🟡 Medium</option>
+                                    <option value="low">🔵 Low</option>
+                                    <option value="info">⚪ Info</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Category:</label>
+                                <select id="security-cat-filter">
+                                    <option value="all">All Categories</option>
+                                    <option value="credential">🔑 Credentials</option>
+                                    <option value="private_key">🗝️ Private Keys</option>
+                                    <option value="api_key">🔐 API Keys</option>
+                                    <option value="token">🎫 Tokens</option>
+                                    <option value="vulnerable_function">⚠️ Unsafe Functions</option>
+                                    <option value="backdoor">🚪 Backdoors</option>
+                                    <option value="weak_crypto">🔓 Weak Crypto</option>
+                                    <option value="insecure_protocol">🌐 Insecure Protocols</option>
+                                    <option value="hardcoded_ip">📡 Hardcoded IPs</option>
+                                    <option value="default_credential">👤 Default Creds</option>
+                                    <option value="sensitive_path">📁 Sensitive Paths</option>
+                                    <option value="buffer_overflow">💥 Buffer Overflow</option>
+                                    <option value="command_injection">💉 Command Injection</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Search:</label>
+                                <input type="text" id="security-search" placeholder="Search findings..." class="filter-input">
+                            </div>
+                            <div style="margin-left: auto; display: flex; gap: 8px;">
+                                <button id="btn-export-html" class="btn btn-outline btn-sm">📄 Export HTML</button>
+                                <button id="btn-export-txt" class="btn btn-outline btn-sm">📝 Export TXT</button>
+                                <button id="btn-scan-secrets" class="btn btn-primary btn-sm">🔍 Deep Scan Secrets</button>
+                            </div>
+                        </div>
+
+                        <!-- Findings Table -->
+                        <div class="security-findings glass-panel">
+                            <h3>Security Findings <span id="findings-count" class="badge">0</span></h3>
+                            <div class="findings-table-wrapper">
+                                <table class="findings-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Severity</th>
+                                            <th>Category</th>
+                                            <th>Finding</th>
+                                            <th>Description</th>
+                                            <th>CWE</th>
+                                            <th>Offset</th>
+                                            <th>Evidence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="findings-tbody">
+                                        <tr class="empty-row">
+                                            <td colspan="7">Run analysis to scan for security issues...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer & Status -->
+        <footer class="app-footer glass-panel">
+            <div class="footer-badge">🔒 All processing is 100% local</div>
+            <div class="footer-version">Firmware-X v1.0.0</div>
+        </footer>
+        
+        <div class="status-bar glass-panel">
+            <div id="status-msg" class="status-msg">Ready</div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/lib/fflate.min.js"></script>
+    <script src="/lib/jszip.min.js"></script>
+    <script src="/modules/file-detector.js?v=3"></script>
+    <script src="/modules/layer-engine.js?v=3"></script>
+    <script src="/modules/archive-extractor.js?v=2"></script>
+    <script src="/modules/binary-parser.js?v=2"></script>
+    <script src="/modules/hex-decoder.js?v=2"></script>
+    <script src="/modules/entropy-analyzer.js?v=2"></script>
+    <script src="/modules/string-extractor.js?v=2"></script>
+    <script src="/modules/hex-viewer.js?v=2"></script>
+    <script src="/modules/disassembler.js?v=2"></script>
+    <script src="/modules/security-analyzer.js?v=3"></script>
+    <script src="app.js?v=15"></script>
+</body>
+</html>
