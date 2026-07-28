@@ -14,7 +14,9 @@
 ║   100% Local Processing — Your Data Stays Yours   ║
 ║                                                   ║
 ╚═══════════════════════════════════════════════════╝
+
 ```
+![server file](./jserver.png)
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-brightgreen)
