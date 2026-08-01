@@ -102,19 +102,19 @@ A **cross-platform** (Windows + Linux + macOS), layer-by-layer firmware analysis
 
 #### Windows (Command Prompt)
 ```batch
-cd "Firmware Decryption"
+cd "Firmware-X"
 install.bat
 ```
 
 #### Windows (PowerShell)
 ```powershell
-cd "Firmware Decryption"
+cd "Firmware-X"
 .\install.ps1
 ```
 
 #### Ubuntu / Kali Linux
 ```bash
-cd "Firmware Decryption"
+cd "Firmware-X"
 chmod +x install.sh
 ./install.sh
 ```
